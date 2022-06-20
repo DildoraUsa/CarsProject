@@ -7,6 +7,8 @@ import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class carsDemoProject {
@@ -53,45 +55,67 @@ public class carsDemoProject {
        Select select = new Select(driver.findElement(By.xpath("//select[@id='pagination-dropdown']")));
 
        List<WebElement> totalCarList = driver.findElements(By.xpath("//h2[@class='title']"));
-        Assert.assertEquals(totalCarList.size(),20);
+       List<Double> carsSortedPrices = new ArrayList<>();
+       List<Integer> carSortedMiles = new ArrayList<>();
+       List<Integer> carsSortedYears = new ArrayList<>();
+       List<Integer> carsSortedLocations=new ArrayList<>();
+
+       Assert.assertEquals(totalCarList.size(),19);
         System.out.println(totalCarList.size());
 
       for (WebElement eachCar:totalCarList){
           System.out.println( eachCar.getText().contains("Tesla Model S"));
        }
+
+
       Select selectCarResult = new Select(driver.findElement(By.xpath("//select[@data-activitykey='sort-dropdown']")));
 
       selectCarResult.selectByIndex(1);
       Thread.sleep(1000);
       List<WebElement> lowestPriceCars = driver.findElements(By.xpath("//div[@class='price-section price-section-vehicle-card']"));
+        int num=0;
       for (WebElement lowestPriceCar: lowestPriceCars){
-          System.out.println(lowestPriceCar.getText());
+         carsSortedPrices.add(Double.valueOf(lowestPriceCar.getText().substring(1,7).replace(",",".")));
+          Collections.sort(carsSortedPrices);
+          Thread.sleep(1000);
+          Assert.assertEquals(Double.valueOf(lowestPriceCar.getText().substring(1,7).replace(",",".")),carsSortedPrices.get(num));
+          num+=1;
       }
-     Assert.assertEquals(lowestPriceCars.get(0).getText(),"$33,990");
-
       selectCarResult.selectByIndex(4);
       Thread.sleep(1000);
       List<WebElement> hightMilageCars = driver.findElements(By.xpath("//div[@data-tracking-orientation='vertical']//div[@class='mileage']"));
+     num=0;
       for (WebElement highMilageCar: hightMilageCars ){
-          System.out.println(highMilageCar.getText());
+          carSortedMiles.add(Integer.valueOf(highMilageCar.getText().replaceAll("[,mi. ]","")));
+          Collections.sort(carSortedMiles,Collections.reverseOrder());
+          Assert.assertEquals(Integer.valueOf(highMilageCar.getText().replaceAll("[,mi. ]","")),carSortedMiles.get(num));
+          num+=1;
       }
-      Assert.assertEquals(hightMilageCars.get(0).getText(),"114,259 mi.");
 
       selectCarResult.selectByIndex(5);
         Thread.sleep(1000);
-      List<WebElement> nearestLocationCars = driver.findElements(By.xpath("//div[@class='miles-from ']"));
+        List<WebElement> nearestLocationCars = driver.findElements(By.xpath("//div[@class='miles-from ']"));
+     num=0;
       for (WebElement nearestLocationCar:nearestLocationCars ){
-          System.out.println(nearestLocationCar.getText());
+          if (nearestLocationCar.getText().contains("1234567890")){
+          carsSortedLocations.add(Integer.valueOf(nearestLocationCar.getText().substring(0,2).trim()));
+          Collections.sort(carsSortedLocations);
+          Assert.assertEquals(Integer.valueOf(nearestLocationCar.getText().substring(0,2).trim()),carsSortedLocations.get(num));
+          num+=1;}
       }
-      Assert.assertEquals(nearestLocationCars.get(0).getText(),"2 mi. from 22182");
+
 
       selectCarResult.selectByIndex(8);
         Thread.sleep(1000);
       List<WebElement> oldestYearCars = driver.findElements(By.xpath("//h2[@class='title']"));
+     num=0;
       for (WebElement oldestYearCar:oldestYearCars){
-          System.out.println(oldestYearCar.getText());
+          carsSortedYears.add(Integer.valueOf(oldestYearCar.getText().substring(0,4)));
+          Collections.sort(carsSortedYears);
+          Assert.assertEquals(Integer.valueOf(oldestYearCar.getText().substring(0,4).trim()),carsSortedYears.get(num));
+          num+=1;
       }
-      Assert.assertEquals(oldestYearCars.get(0).getText(),"2012 Tesla Model S");
+
       driver.quit();
     }
 }
